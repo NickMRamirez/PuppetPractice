@@ -46,18 +46,26 @@ Vagrant.configure(2) do |config|
   )
   
   puppet_agent_install_cmd = %Q(
-    $PUPPET_AGENT_DOWNLOAD_URL = "https://pm.puppetlabs.com/puppet-agent/2015.3.0/1.3.2/repos/windows/puppet-agent-1.3.2-x64.msi?_ga=1.250380614.1504919296.1450823152"
+	$PUPPET_AGENT_DOWNLOAD_URL = "https://pm.puppetlabs.com/puppet-agent/2015.3.0/1.3.2/repos/windows/puppet-agent-1.3.2-x64.msi?_ga=1.250380614.1504919296.1450823152"
 	$OUTPUT_DIR = "C:\\puppet-agent-1.3.2-x64.msi"
 	
-	Write-Host "Downloading Puppet Agent..."
-	Invoke-WebRequest $PUPPET_AGENT_DOWNLOAD_URL -OutFile $OUTPUT_DIR
+	if (Test-Path $OUTPUT_DIR)
+	{
+		Write-Host "Puppet already downloaded."
+	}
+	else
+	{
+	  Write-Host "Downloading Puppet Agent..."
+	  Invoke-WebRequest $PUPPET_AGENT_DOWNLOAD_URL -OutFile $OUTPUT_DIR
 	
-	msiexec /norestart /i $OUTPUT_DIR /qn PUPPET_MASTER_SERVER=10.10.0.2 PUPPET_AGENT_CERTNAME=node1
+	  msiexec /norestart /qn /i $OUTPUT_DIR PUPPET_MASTER_SERVER=10.10.0.2 PUPPET_AGENT_CERTNAME=node1
+	}
 	
-	New-NetFirewallRule -DisplayName "Puppet Agent" -Direction Outbound –LocalPort 8140 -Protocol TCP -Action Allow
+	New-NetFirewallRule -DisplayName PuppetAgent -Direction Outbound -LocalPort 8140 -Protocol TCP -Action Allow
 	
 	# Send certificate request to puppet master
-	# "C:\\Program Files\\Puppet Labs\\Puppet\\bin\\puppet.bat" agent --test
+	Set-Location "C:\\Program Files\\Puppet Labs\\Puppet\\bin"
+	puppet.bat agent --test
   )
   
   # Puppet master GUI: https://10.10.0.2
