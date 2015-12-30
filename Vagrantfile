@@ -58,7 +58,7 @@ Vagrant.configure(2) do |config|
 	  Write-Host "Downloading Puppet Agent..."
 	  Invoke-WebRequest $PUPPET_AGENT_DOWNLOAD_URL -OutFile $OUTPUT_DIR
 	
-	  msiexec /norestart /qn /i $OUTPUT_DIR PUPPET_MASTER_SERVER=10.10.0.2 PUPPET_AGENT_CERTNAME=node1
+	  msiexec /norestart /qn /i $OUTPUT_DIR PUPPET_MASTER_SERVER=puppetmaster PUPPET_AGENT_CERTNAME=node1
 	}
 	
 	New-NetFirewallRule -DisplayName PuppetAgent -Direction Outbound -LocalPort 8140 -Protocol TCP -Action Allow
@@ -95,5 +95,8 @@ Vagrant.configure(2) do |config|
 	
 	node.vm.provision 'shell', inline: puppet_agent_install_cmd
   end
+  
+  # TODO: Add puppetmaster to Windows hosts file
+  # TODO: Install puppet-windowsfeature on puppet master
 
 end
