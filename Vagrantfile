@@ -29,8 +29,7 @@ Vagrant.configure(2) do |config|
   )
   
   puppet_code_dir_cmd = %Q(
-    if [ -L "/etc/puppetlabs/code" && -d "/etc/puppetlabs/code" ]
-	then
+    if [[ -L "/etc/puppetlabs/code" && -d "/etc/puppetlabs/code" ]]; then
       echo "Code directory is already symlinked."
 	else
 	  echo "Replace default code directory with link to our own code directory..."
