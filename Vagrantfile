@@ -22,13 +22,28 @@ Vagrant.configure(2) do |config|
 	  tar xvzf /home/vagrant/$PUPPET_INSTALLER
 	  rm /home/vagrant/$PUPPET_INSTALLER
 	  PATH_TO_ANSWERS_FILE=/vagrant/puppetmaster.answers
-	  $PUPPET_INSTALL_DIR/puppet-enterprise-installer -a $PATH_TO_ANSWERS_FILE -V
-
-	  # Add vagrant to pe-puppet group
-	  sudo usermod -a -G pe-puppet vagrant
+	  $PUPPET_INSTALL_DIR/puppet-enterprise-installer -a $PATH_TO_ANSWERS_FILE -V 
 	else
 	  echo "Puppet Enterprise is already installed."
 	fi
+  )
+  
+  puppet_code_dir_cmd = %Q(
+    if [ -L "/etc/puppetlabs/code" && -d "/etc/puppetlabs/code" ]
+	then
+      echo "Code directory is already symlinked."
+	else
+	  echo "Replace default code directory with link to our own code directory..."
+	  cd /etc/puppetlabs
+	  sudo rm -rf code
+	  sudo ln -s /vagrant/code
+	  sudo ls /etc/puppetlabs/code
+	fi
+  )
+  
+  puppet_generate_cert_cmd = %Q(
+    echo "Generating Puppet Master certificate..."
+    puppet cert generate puppetmaster --dns_alt_names="puppet;10.10.0.2"
   )
   
   puppet_agent_install_cmd = %Q(
@@ -56,7 +71,8 @@ Vagrant.configure(2) do |config|
 	master.vm.hostname = 'puppetmaster'
     master.vm.network 'private_network', ip: '10.10.0.2'
 	master.vm.provision 'shell', inline: puppet_install_cmd
-	master.vm.provision 'shell', inline: 'puppet cert generate puppetmaster --dns_alt_names="puppet;10.10.0.2"'
+	master.vm.provision 'shell', inline: puppet_code_dir_cmd
+	master.vm.provision 'shell', inline: puppet_generate_cert_cmd
 	master.vm.boot_timeout = 1800
 	
 	master.vm.provider :virtualbox do |vb|

@@ -10,10 +10,8 @@ node 'puppetmaster' {
   }
 }
 
-node 'node1.aclens.local' {
-  notice("Updating node1")
-  
-  class { 'profiles::iis' :
+node 'node1' {
+  class { 'profile::iis' :
   
   }
 }
