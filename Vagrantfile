@@ -57,7 +57,7 @@ Vagrant.configure(2) do |config|
 	New-NetFirewallRule -DisplayName "Puppet Agent" -Direction Outbound –LocalPort 8140 -Protocol TCP -Action Allow
 	
 	# Send certificate request to puppet master
-	"C:\\Program Files\\Puppet Labs\\Puppet\\bin\\puppet.bat" agent --test
+	# "C:\\Program Files\\Puppet Labs\\Puppet\\bin\\puppet.bat" agent --test
   )
   
   # Puppet master GUI: https://10.10.0.2
